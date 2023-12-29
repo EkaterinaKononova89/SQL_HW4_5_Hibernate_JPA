@@ -1,23 +1,24 @@
 package ru.netology.SQL_HW4_5_Hibernate_JPA.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import ru.netology.SQL_HW4_5_Hibernate_JPA.entity.PersonUniqueInfo;
 import ru.netology.SQL_HW4_5_Hibernate_JPA.entity.Persons;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public class PersonRepository {
+public interface PersonRepository extends JpaRepository<Persons, PersonUniqueInfo> {
+    List<Persons> findByCityOfLiving(String city);
 
-    @PersistenceContext
-    // многопоточный @Autowire; @PersistenceContext умеет инжектировать только напрямую в поле, без конструктора
-    private EntityManager entityManager;
+    // метод, который принимает возраст (age) и возвращает Entity из БД, которые меньше переданного age и отсортированы по возрастанию
+    List<Persons> findByUniqueInfo_AgeLessThan(int age, Sort sort);
+    //или так:
+    //List<Persons> findByUniqueInfo_AgeLessThanOrderByUniqueInfo_Age(Integer age);
 
-    public List<Persons> getPersonsByCity(String city) {
 
-        return entityManager.createQuery("SELECT p FROM Persons p WHERE p.cityOfLiving LIKE :requiredCity") // запрос на HQL (Hibernate Query Language)
-                .setParameter("requiredCity", city)
-                .getResultList();
-    }
+    // метод, который принимает имя и фамилию (name и surname) и возвращает Entity из БД, которые соответствуют сочетанию name и surname
+    Optional<Persons> findByUniqueInfo_NameAndUniqueInfo_Surname(String name, String surname);
 }
